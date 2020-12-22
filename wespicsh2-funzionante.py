@@ -7,6 +7,7 @@ Created on Sun Dec 20 21:33:00 2020
 
 
 import logging
+import scraper as sc
 from telegram import ReplyKeyboardMarkup, Update
 from telegram.ext import (
     Updater,
@@ -28,21 +29,48 @@ logger = logging.getLogger(__name__)
 
 Wespicsh_base_knowledge = "\nOra che mi hai avviato con /start, ti dico che non sempre dò aiuto con /help."
 
+PREZZO = range(1)
 
+reply_keyboard = [
+    ['Prezzo'],
+    ['Done'],
+]
+
+markup = ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True)
+
+'''
 def start(update: Update, context: CallbackContext) -> None:
     """Send a message when the command /start is issued."""
     update.message.reply_text('Ciaone a te!' + Wespicsh_base_knowledge)
-
+'''
 
 def help_command(update: Update, context: CallbackContext) -> None:
     """Send a message when the command /help is issued."""
     update.message.reply_text('Aiutati da solo')
 
 
+
+
+
+def item(update: Update, context: CallbackContext) -> int:
+    """Nome e prezzo articolo messo su scraper"""
+    update.message.reply_text(f'Prezzo: {sc.see_price}', reply_markup=markup,)
+
+    return PREZZO
+
+
+def done(update: Update, context: CallbackContext) -> int:
+    update.message.reply_text(
+        "ciao"
+    )
+
+    return ConversationHandler.END
+
+'''
 def unknown(update, context):
     answer = "Dai su, t'ho detto cosa puoi fare..."
     context.bot.send_message(chat_id=update.effective_chat.id, text=answer)
-
+'''
 
 def main():
     """Start the bot."""
@@ -50,17 +78,26 @@ def main():
 
     # Get the dispatcher to register handlers
     dispatcher = updater.dispatcher
+
+    conv_handler = ConversationHandler(
+        entry_points=[CommandHandler('start', start)],
+        states={
+            PREZZO: [
+                MessageHandler(
+                    Filters.regex('^(Prezzo)$'), item
+                )
+            ],
+        },
+        fallbacks=[MessageHandler(Filters.regex('^Done$'), done)],
+    )
     
     # on different commands - answer in Telegram
-    dispatcher.add_handler(CommandHandler("start", start))
+    #dispatcher.add_handler(CommandHandler("start", start))
     dispatcher.add_handler(CommandHandler("help", help_command))
-    dispatcher.add_handler(MessageHandler(Filters.command, unknown))
+    #dispatcher.add_handler(MessageHandler(Filters.command, unknown))
     dispatcher.add_handler(CommandHandler("item", item))
     dispatcher.add_handler(conv_handler)
-    
-    # Get the dispatcher to register handlers
-    dispatcher = updater.dispatcher
-    
+
     # Start the Bot
     updater.start_polling()
 
