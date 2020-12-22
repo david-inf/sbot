@@ -58,9 +58,6 @@ def main():
     dispatcher.add_handler(CommandHandler("item", item))
     dispatcher.add_handler(conv_handler)
     
-    # Get the dispatcher to register handlers
-    dispatcher = updater.dispatcher
-    
     # Start the Bot
     updater.start_polling()
 
